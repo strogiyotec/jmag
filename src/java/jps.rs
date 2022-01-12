@@ -1,47 +1,56 @@
-//Abstraction over jps
-
-use std::process::Command;
+// Abstraction over jps
+use std::{fmt::Display, process::Command};
 
 //output line from jps
 pub struct JpsLine {
     pid: u32,
-    name: str,
+    name: String,
 }
 
-pub struct Jps {}
+impl JpsLine {
+    fn from_vec(vec: Vec<&str>) -> JpsLine {
+        return JpsLine {
+            pid: vec[0].parse().unwrap(),
+            name: vec[1].to_string(),
+        };
+    }
+}
 
-impl Jps {
-    //show all java processes except for jps
-    //TODO: replace it with list of java processes to be used in the UI
-    pub fn show_java_processes(&self) {
-        let process =
-            Command::new("jps").output().expect(
-                "jps command failed to start",
-            );
-        let output = String::from_utf8_lossy(
-            &process.stdout,
-        );
-        let parts: Vec<&str> =
-            output.split("\n").collect();
-        //if only jps process itself
-        if parts.len() == 1 {
-            println!("No java processes");
-        } else {
-            for (pos, element) in
-                parts.iter().enumerate()
+impl Display for JpsLine {
+    fn fmt(
+        &self,
+        f: &mut std::fmt::Formatter<'_>,
+    ) -> Result<(), std::fmt::Error> {
+        write!(f, "{} {}", &self.pid, &self.name)
+    }
+}
+
+pub fn list_java_processes() -> Vec<JpsLine> {
+    let process = Command::new("jps")
+        .output()
+        .expect("jps command failed to start");
+    let output =
+        String::from_utf8_lossy(&process.stdout);
+    let parts: Vec<&str> =
+        output.split("\n").collect();
+    //if only jps process itself
+    if parts.len() == 1 {
+        return Vec::new();
+    } else {
+        let mut java_processes: Vec<JpsLine> =
+            Vec::with_capacity(parts.len());
+        for (pos, element) in
+            parts.iter().enumerate()
+        {
+            if pos != 0 && pos != parts.len() - 1
             {
-                if pos != 0 {
-                    let parts: Vec<&str> =
-                        element
-                            .split(" ")
-                            .collect();
-                    println!("{}", parts[0]);
-                }
+                let parts: Vec<&str> =
+                    element.split(" ").collect();
+                java_processes.push(
+                    JpsLine::from_vec(parts),
+                );
             }
         }
-    }
-
-    pub fn new() -> Jps {
-        return Jps {};
+        return java_processes;
     }
 }

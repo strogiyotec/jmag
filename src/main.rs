@@ -9,8 +9,7 @@ use termion::{
 use tui::{
     backend::TermionBackend,
     layout::{
-        Alignment, Constraint, Corner, Direction,
-        Layout,
+        Alignment, Constraint, Direction, Layout,
     },
     style::{Color, Modifier, Style},
     text::{Span, Spans},
@@ -28,42 +27,15 @@ use util::{
 ///
 /// Check the event handling at the bottom to see how to change the state on incoming events.
 /// Check the drawing logic for items on how to specify the highlighting style for selected items.
-struct App<'a> {
-    //TODO: Replace it with JmapLine
-    items: StatefulList<(&'a str, usize)>,
+struct App {
+    items: StatefulList<java::jps::JpsLine>,
 }
 
-impl<'a> App<'a> {
-    fn new() -> App<'a> {
+impl App {
+    fn new() -> App {
         App {
             items: StatefulList::with_items(
-                vec![
-                    ("Item0", 1),
-                    ("Item1", 2),
-                    ("Item2", 1),
-                    ("Item3", 3),
-                    ("Item4", 1),
-                    ("Item5", 4),
-                    ("Item6", 1),
-                    ("Item7", 3),
-                    ("Item8", 1),
-                    ("Item9", 6),
-                    ("Item10", 1),
-                    ("Item11", 3),
-                    ("Item12", 1),
-                    ("Item13", 2),
-                    ("Item14", 1),
-                    ("Item15", 1),
-                    ("Item16", 4),
-                    ("Item17", 1),
-                    ("Item18", 5),
-                    ("Item19", 4),
-                    ("Item20", 1),
-                    ("Item21", 2),
-                    ("Item22", 1),
-                    ("Item23", 3),
-                    ("Item24", 1),
-                ],
+                java::jps::list_java_processes(),
             ),
         }
     }
@@ -86,7 +58,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         terminal.draw(|f| {
             let chunks = Layout::default()
                 .direction(Direction::Horizontal)
-                .constraints([Constraint::Percentage(100)].as_ref())
+                .constraints(
+                    [Constraint::Percentage(100)]
+                        .as_ref(),
+                )
                 .split(f.size());
 
             // Iterate through all elements in the `items` app and append some debug text to it.
@@ -95,18 +70,16 @@ fn main() -> Result<(), Box<dyn Error>> {
                 .items
                 .iter()
                 .map(|i| {
-                    let mut lines = vec![Spans::from(i.0)];
-                    for _ in 0..i.1 {
-                        lines.push(Spans::from(Span::styled(
-                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                            Style::default().add_modifier(Modifier::ITALIC),
-                        )));
-                    }
+                    let lines =
+                        vec![Spans::from(
+                            i.to_string(),
+                        )];
                     return ListItem::new(lines)
-                        .style(Style::default()
-                               .fg(Color::White)
-                               .bg(Color::Black)
-                        )
+                        .style(
+                            Style::default()
+                                .fg(Color::White)
+                                .bg(Color::Black),
+                        );
                 })
                 .collect();
 
@@ -114,20 +87,27 @@ fn main() -> Result<(), Box<dyn Error>> {
             let items = List::new(items)
                 .block(
                     Block::default()
-                    .borders(Borders::ALL)
-                    .title("Jmag")
-                    .title_alignment(Alignment::Center)
+                        .borders(Borders::ALL)
+                        .title("Jmag")
+                        .title_alignment(
+                            Alignment::Center,
+                        ),
                 )
                 .highlight_style(
                     Style::default()
                         .bg(Color::LightGreen)
-                        .add_modifier(Modifier::BOLD),
+                        .add_modifier(
+                            Modifier::BOLD,
+                        ),
                 )
                 .highlight_symbol(">> ");
 
             // We can now render the item list
-            f.render_stateful_widget(items, chunks[0], &mut app.items.state);
-
+            f.render_stateful_widget(
+                items,
+                chunks[0],
+                &mut app.items.state,
+            );
         })?;
 
         // This is a simple example on how to handle events
