@@ -26,6 +26,7 @@ impl Display for JpsLine {
 }
 
 pub fn list_java_processes() -> Vec<JpsLine> {
+    //run jps
     let process = Command::new("jps")
         .output()
         .expect("jps command failed to start");
@@ -33,7 +34,7 @@ pub fn list_java_processes() -> Vec<JpsLine> {
         String::from_utf8_lossy(&process.stdout);
     let parts: Vec<&str> =
         output.split("\n").collect();
-    //if only jps process itself
+    //if there is no any java processes then jps will show only itself
     if parts.len() == 1 {
         return Vec::new();
     } else {
@@ -42,6 +43,7 @@ pub fn list_java_processes() -> Vec<JpsLine> {
         for (pos, element) in
             parts.iter().enumerate()
         {
+            //otherwise
             if pos != 0 && pos != parts.len() - 1
             {
                 let parts: Vec<&str> =

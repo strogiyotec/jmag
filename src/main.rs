@@ -51,7 +51,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let events = Events::new();
 
-    // Create a new app with some example state
     let mut app = App::new();
 
     loop {
@@ -82,7 +81,6 @@ fn main() -> Result<(), Box<dyn Error>> {
                         );
                 })
                 .collect();
-
             // Create a List from all list items and highlight the currently selected one
             let items = List::new(items)
                 .block(
@@ -127,6 +125,23 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
                 Key::Char('k') => {
                     app.items.previous();
+                }
+                //handle enter key
+                Key::Char('\n') => {
+                    match app
+                        .items
+                        .state
+                        .selected()
+                    {
+                        Some(index) => {
+                            println!(
+                                "{}",
+                                app.items.items
+                                    [index]
+                            )
+                        }
+                        None => {}
+                    }
                 }
                 _ => {}
             },
